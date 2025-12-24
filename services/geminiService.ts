@@ -5,7 +5,7 @@ import { Message, GroundingLink } from "../types.ts";
 export const chatWithGemini = async (messages: Message[], systemInstruction: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-3-pro-preview",
+    model: "gemini-2.5-flash",
     contents: messages.map(m => ({
       role: m.role === 'model' ? 'model' : 'user',
       parts: [{ text: m.text }]
@@ -20,7 +20,7 @@ export const chatWithGemini = async (messages: Message[], systemInstruction: str
 export const searchGrounding = async (query: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-2.5-flash",
     contents: `Recent research papers and articles about: ${query}. Please provide summaries in Persian for each English source.`,
     config: {
       tools: [{ googleSearch: {} }],
@@ -46,7 +46,7 @@ export const searchGrounding = async (query: string) => {
 export const generateLesson = async (topicTitle: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-3-pro-preview",
+    model: "gemini-2.5-flash",
     contents: `Write a detailed academic lesson note in Persian about "${topicTitle}".`,
     config: {
       systemInstruction: "You are a senior professor in Photonics specializing in waveguide design."
@@ -58,7 +58,7 @@ export const generateLesson = async (topicTitle: string) => {
 export const generatePythonTutorial = async (topicTitle: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-3-pro-preview",
+    model: "gemini-2.5-flash",
     contents: `Create a comprehensive Python & AI tutorial for: "${topicTitle}".`,
     config: {
       systemInstruction: "You are an expert Computational Physicist and Senior Python Developer."
@@ -70,7 +70,7 @@ export const generatePythonTutorial = async (topicTitle: string) => {
 export const getSimulationHelp = async (task: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-3-pro-preview",
+    model: "gemini-2.5-flash",
     contents: task,
     config: {
       systemInstruction: "You are an expert computational physicist specialized in photonic simulations."
