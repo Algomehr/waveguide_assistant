@@ -1,0 +1,9 @@
+{
+  "name": "WaveOptix AI - Grating & Waveguide Assistant",
+  "description": "A comprehensive smart platform for waveguide and grating design researchers, featuring specialized chat, an academic module, research discovery with Google Search, and simulation/optimization guidance.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
