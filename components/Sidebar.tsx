@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AppView } from '../types';
+import { AppView } from '../types.ts';
 import { 
   ChatBubbleLeftRightIcon, 
   AcademicCapIcon, 
@@ -9,7 +9,8 @@ import {
   BeakerIcon,
   CircleStackIcon,
   WrenchScrewdriverIcon,
-  CodeBracketSquareIcon
+  CodeBracketSquareIcon,
+  ScaleIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -20,6 +21,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
   const navItems = [
     { id: AppView.CHAT, label: 'گفتگو و دستیار صوتی', icon: ChatBubbleLeftRightIcon },
+    { id: AppView.LAB_SETUP, label: 'تنظیمات ستاپ آزمایشگاه', icon: ScaleIcon },
     { id: AppView.ACADEMY, label: 'آموزشگاه تخصصی', icon: AcademicCapIcon },
     { id: AppView.PYTHON_AI, label: 'مرکز پایتون و هوش مصنوعی', icon: CodeBracketSquareIcon },
     { id: AppView.DISCOVERY, label: 'اکتشاف منابع', icon: MagnifyingGlassIcon },
@@ -30,14 +32,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
   ];
 
   return (
-    <div className="w-64 bg-slate-900 h-screen border-l border-slate-800 flex flex-col p-4 shadow-xl">
-      <div className="mb-10 flex items-center gap-3 px-2">
-        <div className="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/20">
-          <span className="text-white font-bold text-xl">W</span>
+    <div className="w-72 bg-slate-950 h-screen border-l border-slate-900 flex flex-col p-6 shadow-2xl">
+      <div className="mb-12 flex items-center gap-4 px-2">
+        <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <span className="text-white font-black text-2xl">W</span>
         </div>
         <div>
-          <h1 className="text-lg font-bold tracking-tight text-white">WaveOptix AI</h1>
-          <p className="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">Research Group</p>
+          <h1 className="text-xl font-black tracking-tight text-white leading-tight">WaveOptix AI</h1>
+          <p className="text-[10px] text-cyan-400 uppercase tracking-widest font-black opacity-80">R&D Lab Suite</p>
         </div>
       </div>
 
@@ -49,23 +51,23 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
             <button
               key={item.id}
               onClick={() => setView(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+              className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 border ${
                 isActive 
-                  ? 'bg-cyan-600/10 text-cyan-400 border border-cyan-600/20 shadow-inner' 
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  ? 'bg-cyan-600/10 text-cyan-400 border-cyan-500/30 shadow-[inset_0_0_15px_rgba(6,182,212,0.1)]' 
+                  : 'text-slate-500 border-transparent hover:bg-slate-900 hover:text-slate-300'
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="font-medium text-sm">{item.label}</span>
+              <Icon className={`w-5 h-5 ${isActive ? 'text-cyan-400' : 'text-slate-600'}`} />
+              <span className="font-bold text-sm">{item.label}</span>
             </button>
           );
         })}
       </nav>
 
-      <div className="pt-6 border-t border-slate-800">
-        <div className="bg-slate-800/50 p-4 rounded-2xl">
-          <p className="text-xs text-slate-500 leading-relaxed text-right">
-            تخصصی برای ویفرهای SiN. تحلیل بازدهی و تلرانس‌های ساخت.
+      <div className="pt-8 border-t border-slate-900">
+        <div className="bg-slate-900/50 p-5 rounded-2xl border border-slate-800">
+          <p className="text-[11px] text-slate-500 leading-relaxed text-right font-medium">
+            تخصصی برای گروه‌های لیتوگرافی تداخلی و رایتینگ گرتینگ.
           </p>
         </div>
       </div>
