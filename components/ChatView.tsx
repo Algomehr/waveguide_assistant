@@ -125,31 +125,31 @@ const ChatView: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-slate-950">
-      <header className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
-        <div>
-          <h2 className="text-xl font-bold text-white">گفتگو با هوش مصنوعی</h2>
-          <div className="flex items-center gap-2 mt-1">
+      <header className="p-4 lg:p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 gap-4">
+        <div className="text-center sm:text-right w-full sm:w-auto">
+          <h2 className="text-lg lg:text-xl font-bold text-white">گفتگو با هوش مصنوعی</h2>
+          <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
             <div className={`w-2 h-2 rounded-full ${isLiveActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`}></div>
-            <p className="text-xs text-slate-400">{isLiveActive ? 'دستیار صوتی فعال است' : 'آماده برای راهنمایی'}</p>
+            <p className="text-[10px] lg:text-xs text-slate-400">{isLiveActive ? 'دستیار صوتی فعال است' : 'آماده برای راهنمایی'}</p>
           </div>
         </div>
         <button 
           onClick={isLiveActive ? stopLiveAssistant : startLiveAssistant}
-          className={`flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all shadow-lg ${
+          className={`flex items-center gap-2 lg:gap-3 px-4 lg:px-6 py-2 lg:py-3 rounded-xl lg:rounded-2xl border transition-all shadow-lg text-xs lg:text-sm font-bold uppercase tracking-wider ${
             isLiveActive 
               ? 'bg-rose-500/20 border-rose-500 text-rose-500 hover:bg-rose-500/30' 
               : 'bg-cyan-500/10 border-cyan-500 text-cyan-400 hover:bg-cyan-500/20'
           }`}
         >
           {isLiveActive ? <StopIcon className="w-5 h-5" /> : <MicrophoneIcon className="w-5 h-5" />}
-          <span className="text-sm font-bold uppercase tracking-wider">{isLiveActive ? 'توقف دستیار صوتی' : 'گفتگوی صوتی (Live)'}</span>
+          <span>{isLiveActive ? 'توقف دستیار صوتی' : 'گفتگوی صوتی (Live)'}</span>
         </button>
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}>
-            <div className={`max-w-[85%] p-5 rounded-[2rem] shadow-sm ${
+            <div className={`max-w-[90%] sm:max-w-[85%] p-4 lg:p-5 rounded-2xl lg:rounded-[2rem] shadow-sm ${
               msg.role === 'user' 
                 ? 'bg-slate-800 text-slate-200 rounded-tr-none' 
                 : 'bg-cyan-900/30 text-cyan-50 border border-cyan-800/50 rounded-tl-none'
@@ -161,22 +161,22 @@ const ChatView: React.FC = () => {
         {isLoading && <div className="text-cyan-500 animate-pulse text-xs pr-4">در حال پردازش...</div>}
       </div>
 
-      <div className="p-6 border-t border-slate-800">
+      <div className="p-4 lg:p-6 border-t border-slate-800">
         <div className="relative flex items-center max-w-5xl mx-auto">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="سوال فنی خود را بپرسید..."
-            className="w-full bg-slate-900 border border-slate-800 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all pr-16 text-right"
+            placeholder="سوال فنی..."
+            className="w-full bg-slate-900 border border-slate-800 text-white rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all pr-12 lg:pr-16 text-right text-sm"
           />
           <button
             onClick={handleSend}
             disabled={isLoading}
-            className="absolute left-2 bg-cyan-600 hover:bg-cyan-500 text-white p-3 rounded-xl transition-all shadow-lg shadow-cyan-600/20"
+            className="absolute left-2 bg-cyan-600 hover:bg-cyan-500 text-white p-2 lg:p-3 rounded-lg lg:rounded-xl transition-all shadow-lg"
           >
-            <PaperAirplaneIcon className="w-6 h-6 rotate-180" />
+            <PaperAirplaneIcon className="w-5 h-5 lg:w-6 lg:h-6 rotate-180" />
           </button>
         </div>
       </div>

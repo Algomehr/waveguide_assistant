@@ -7,59 +7,45 @@ const FabricationView: React.FC = () => {
   const [period, setPeriod] = useState(600); // nm
   const [dutyCycle, setDutyCycle] = useState(0.5); 
   const [etchDepth, setEtchDepth] = useState(150); // nm
-  const [sinThickness, setSinThickness] = useState(300); // nm (Fixed wafer baseline)
+  const [sinThickness, setSinThickness] = useState(300); // nm 
   
   // Coupling Parameters
   const [wavelength, setWavelength] = useState(1550); // nm
   const [angle, setAngle] = useState(10); // degrees
   const [fiberMfd, setFiberMfd] = useState(10); // um
 
-  // Physics constants for SiN platform
   const n_sin = 2.0;
-  const n_cladding = 1.44; // SiO2 cladding
+  const n_cladding = 1.44;
 
-  // Simple Analytical Model for Coupling Efficiency (eta)
-  // eta = overlap * diffraction_efficiency
   const results = useMemo(() => {
-    // 1. Calculate Effective Index (Approximate based on thickness and etch)
-    // Weighted average of etched and unetched regions
     const n_unetched = n_sin; 
     const n_etched = (n_sin * (sinThickness - etchDepth) + n_cladding * etchDepth) / sinThickness;
-    const n_eff = (n_unetched + n_etched) / 2 * (1 - 0.1 * (1-dutyCycle)); // Rough approximation
+    const n_eff = (n_unetched + n_etched) / 2 * (1 - 0.1 * (1-dutyCycle));
 
-    // 2. Grating Coupler Equation: sin(theta) = n_eff - lambda/period
     const targetSinTheta = n_eff - (wavelength / period);
     const actualSinTheta = Math.sin(angle * Math.PI / 180);
-    
-    // Detuning loss (Gaussian shape)
     const detuning = Math.abs(actualSinTheta - targetSinTheta);
     const angularMatch = Math.exp(-Math.pow(detuning / 0.05, 2));
 
-    // Diffraction efficiency estimate (Simplified based on etch depth)
-    // Optimal etch usually around 50-70% of thickness for top coupling
     const etchRatio = etchDepth / sinThickness;
     const diffractionEff = 0.8 * Math.exp(-Math.pow(etchRatio - 0.4, 2) * 5);
 
-    // Final efficiency in percentage
     const efficiency = Math.max(0, diffractionEff * angularMatch * 0.6 * 100); 
     
     return {
       efficiency: efficiency.toFixed(2),
       n_eff: n_eff.toFixed(3),
       detuning: detuning.toFixed(4),
-      // Fix: Removed redundant and type-incorrect parseFloat as efficiency is already a number
       loss: (-10 * Math.log10(efficiency / 100 || 0.001)).toFixed(2)
     };
   }, [period, dutyCycle, etchDepth, sinThickness, wavelength, angle]);
 
-  // Generate data for Spectral Plot (Efficiency vs Wavelength)
   const plotData = useMemo(() => {
     const points = [];
     for (let lam = wavelength - 100; lam <= wavelength + 100; lam += 5) {
       const n_unetched = n_sin;
       const n_etched = (n_sin * (sinThickness - etchDepth) + n_cladding * etchDepth) / sinThickness;
       const n_eff = (n_unetched + n_etched) / 2 * (1 - 0.1 * (1-dutyCycle));
-      
       const targetSinTheta = n_eff - (lam / period);
       const actualSinTheta = Math.sin(angle * Math.PI / 180);
       const detuning = Math.abs(actualSinTheta - targetSinTheta);
@@ -74,7 +60,7 @@ const FabricationView: React.FC = () => {
 
   const Slider = ({ label, value, min, max, step, onChange, unit }: any) => (
     <div className="flex flex-col gap-1 w-full">
-      <div className="flex justify-between text-[11px] font-bold text-slate-400">
+      <div className="flex justify-between text-[10px] lg:text-[11px] font-bold text-slate-400">
         <span>{label}</span>
         <span className="text-cyan-400">{value} {unit}</span>
       </div>
@@ -87,142 +73,108 @@ const FabricationView: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 overflow-hidden">
-      <header className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/40 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <WrenchScrewdriverIcon className="w-8 h-8 text-cyan-500" />
-          <div>
-            <h2 className="text-xl font-bold text-white">آنالیز ساخت و کوپلینگ (SiN Platform)</h2>
-            <p className="text-xs text-slate-400">شبیه‌سازی بازدهی کوپلینگ برای ویفرهای نیترید سیلیسیم</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-700 flex flex-col items-end">
-            <span className="text-[10px] text-slate-500 uppercase">Wafer Baseline</span>
-            <span className="text-xs font-bold text-slate-300">SiN (n=2.0) on SiO2</span>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex-1 flex overflow-hidden">
-        {/* Parameters Sidebar */}
-        <div className="w-80 bg-slate-900/50 border-l border-slate-800 p-6 overflow-y-auto space-y-8">
-          <section className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+    <div className="flex flex-col lg:flex-row h-full bg-slate-950 overflow-hidden">
+      {/* Parameters Sidebar - Top on Mobile, Right on Desktop */}
+      <div className="w-full lg:w-80 bg-slate-900 border-b lg:border-b-0 lg:border-l border-slate-800 p-4 lg:p-6 overflow-y-auto max-h-[40vh] lg:max-h-full scrollbar-hide">
+        <div className="flex lg:flex-col gap-8 lg:gap-10">
+          <section className="space-y-4 min-w-[240px] lg:min-w-0">
+            <h3 className="text-[10px] lg:text-xs font-bold text-slate-500 uppercase flex items-center gap-2 mb-4">
               <CpuChipIcon className="w-4 h-4" />
-              پارامترهای ساخت (Fabrication)
+              پارامترهای ساخت
             </h3>
-            <Slider label="ضخامت کل SiN" value={sinThickness} min={100} max={600} step={10} onChange={setSinThickness} unit="nm" />
-            <Slider label="دوره تناوب (Λ)" value={period} min={300} max={1200} step={1} onChange={setPeriod} unit="nm" />
-            <Slider label="عمق حکاکی (Etch)" value={etchDepth} min={10} max={sinThickness} step={5} onChange={setEtchDepth} unit="nm" />
-            <Slider label="فاکتور وظیفه (Fill)" value={dutyCycle} min={0.1} max={0.9} step={0.05} onChange={setDutyCycle} unit="" />
+            <Slider label="ضخامت SiN" value={sinThickness} min={100} max={600} step={10} onChange={setSinThickness} unit="nm" />
+            <Slider label="دوره تناوب" value={period} min={300} max={1200} step={1} onChange={setPeriod} unit="nm" />
+            <Slider label="عمق حکاکی" value={etchDepth} min={10} max={sinThickness} step={5} onChange={setEtchDepth} unit="nm" />
           </section>
 
-          <section className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+          <section className="space-y-4 min-w-[240px] lg:min-w-0">
+            <h3 className="text-[10px] lg:text-xs font-bold text-slate-500 uppercase flex items-center gap-2 mb-4">
               <ChartBarIcon className="w-4 h-4" />
-              پارامترهای آزمایشگاه (Setup)
+              پارامترهای آزمایشگاه
             </h3>
-            <Slider label="طول موج مرکزی" value={wavelength} min={1200} max={1700} step={1} onChange={setWavelength} unit="nm" />
+            <Slider label="طول موج" value={wavelength} min={1200} max={1700} step={1} onChange={setWavelength} unit="nm" />
             <Slider label="زاویه فیبر" value={angle} min={0} max={30} step={0.1} onChange={setAngle} unit="deg" />
-            <Slider label="MFD فیبر" value={fiberMfd} min={5} max={20} step={0.5} onChange={setFiberMfd} unit="μm" />
           </section>
         </div>
+      </div>
 
-        {/* Dashboard Area */}
-        <div className="flex-1 p-8 overflow-y-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            
-            {/* Efficiency Stats Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl group-hover:bg-cyan-500/20 transition-all"></div>
-              <h4 className="text-sm font-bold text-slate-400 mb-8 uppercase tracking-widest">Coupling Analysis</h4>
-              
-              <div className="flex items-end gap-2 mb-1">
-                <span className="text-6xl font-bold text-white">{results.efficiency}</span>
-                <span className="text-2xl font-bold text-cyan-500 mb-2">%</span>
-              </div>
-              <p className="text-slate-500 text-sm mb-8">بازدهی کوپلینگ تخمین زده شده</p>
+      {/* Main Dashboard area */}
+      <div className="flex-1 overflow-y-auto p-4 lg:p-8">
+        <header className="mb-6 lg:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 className="text-xl lg:text-2xl font-bold text-white flex items-center gap-3">
+              <WrenchScrewdriverIcon className="w-6 h-6 text-cyan-500" />
+              آنالیز ساخت و کوپلینگ
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">شبیه‌سازی بازدهی کوپلینگ SiN Platform</p>
+          </div>
+          <div className="bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-700 text-right">
+            <span className="text-[10px] text-slate-500 uppercase block">Material System</span>
+            <span className="text-xs font-bold text-slate-300">SiN (n=2.0) / SiO2</span>
+          </div>
+        </header>
 
-              <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-800">
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase">Effective Index (n_eff)</p>
-                  <p className="text-lg font-bold text-slate-300">{results.n_eff}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase">Insertion Loss (dB)</p>
-                  <p className="text-lg font-bold text-amber-500">{results.loss} dB</p>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-8 max-w-6xl mx-auto">
+          {/* Efficiency Stats Card */}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 lg:p-8 shadow-2xl relative overflow-hidden">
+            <h4 className="text-[10px] lg:text-xs font-bold text-slate-400 mb-6 uppercase tracking-widest">Efficiency Result</h4>
+            <div className="flex items-end gap-2 mb-1">
+              <span className="text-5xl lg:text-6xl font-bold text-white">{results.efficiency}</span>
+              <span className="text-xl lg:text-2xl font-bold text-cyan-500 mb-2">%</span>
             </div>
-
-            {/* Schematic View */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl flex flex-col items-center">
-              <h4 className="text-sm font-bold text-slate-400 mb-8 uppercase self-start">Grating Schematic (z-x)</h4>
-              <div className="w-full h-40 relative flex items-end justify-center">
-                {/* SiO2 Bottom Cladding */}
-                <div className="absolute bottom-0 w-full h-10 bg-slate-700/50 border-t border-slate-600 rounded-b-lg"></div>
-                {/* SiN Layer with Etch */}
-                <div className="flex items-end gap-[1px] h-[60px]">
-                  {[...Array(12)].map((_, i) => (
-                    <React.Fragment key={i}>
-                      <div className="bg-cyan-600/80 w-4 border-t border-cyan-400" style={{ height: `${sinThickness/10}px` }}></div>
-                      <div className="bg-cyan-600/30 w-4 border-t border-cyan-400/30" style={{ height: `${(sinThickness - etchDepth)/10}px` }}></div>
-                    </React.Fragment>
-                  ))}
-                </div>
-                {/* Fiber representation */}
-                <div className="absolute -top-10 w-2 h-16 bg-slate-500/20 border-x border-slate-400/50 blur-[1px]" style={{ transform: `rotate(${angle}deg)`, left: '50%' }}></div>
+            <p className="text-slate-500 text-xs lg:text-sm mb-6 lg:mb-8">تخمین بازدهی کوپلینگ</p>
+            <div className="grid grid-cols-2 gap-4 pt-4 lg:pt-6 border-t border-slate-800">
+              <div>
+                <p className="text-[9px] lg:text-[10px] text-slate-500 uppercase">Effective Index</p>
+                <p className="text-base lg:text-lg font-bold text-slate-300">{results.n_eff}</p>
               </div>
-              <p className="mt-4 text-[10px] text-slate-500 italic">نمایش شماتیک حکاکی روی نیترید سیلیسیم</p>
-            </div>
-
-            {/* Spectral Plot */}
-            <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
-              <h4 className="text-sm font-bold text-slate-400 mb-6 uppercase">Spectral Response (Efficiency vs Wavelength)</h4>
-              <div className="h-64 w-full relative">
-                <svg className="w-full h-full overflow-visible" viewBox="0 0 400 100">
-                  {/* Grid Lines */}
-                  <line x1="0" y1="0" x2="400" y2="0" stroke="#334155" strokeWidth="0.5" />
-                  <line x1="0" y1="50" x2="400" y2="50" stroke="#1e293b" strokeWidth="0.5" />
-                  <line x1="0" y1="100" x2="400" y2="100" stroke="#334155" strokeWidth="0.5" />
-                  
-                  {/* Efficiency Curve */}
-                  <polyline
-                    fill="none"
-                    stroke="#06b6d4"
-                    strokeWidth="1.5"
-                    points={plotData.map((p, i) => `${(i / plotData.length) * 400},${100 - p.y}`).join(' ')}
-                  />
-                  
-                  {/* Current Operating Point Marker */}
-                  <circle 
-                    cx="200" 
-                    cy={100 - parseFloat(results.efficiency)} 
-                    r="3" 
-                    fill="#06b6d4" 
-                    className="animate-pulse"
-                  />
-                </svg>
-                <div className="flex justify-between text-[10px] text-slate-500 mt-2 px-1">
-                  <span>{wavelength - 100} nm</span>
-                  <span>{wavelength} nm</span>
-                  <span>{wavelength + 100} nm</span>
-                </div>
+              <div>
+                <p className="text-[9px] lg:text-[10px] text-slate-500 uppercase">Loss (dB)</p>
+                <p className="text-base lg:text-lg font-bold text-amber-500">{results.loss} dB</p>
               </div>
             </div>
           </div>
 
-          {/* Warnings and Tips */}
-          <div className="mt-8 flex gap-4 p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl max-w-6xl mx-auto">
-            <ExclamationTriangleIcon className="w-6 h-6 text-amber-500 shrink-0" />
-            <div className="text-sm">
-              <strong className="text-amber-500 block mb-1">هشدار تلرانس ساخت:</strong>
-              <p className="text-slate-400 leading-relaxed">
-                با توجه به ضریب شکست SiN، حساسیت به عمق حکاکی بسیار بالاست. در صورت افزایش Etch Depth به بیش از ۵۰٪ ضخامت، تلفات بازتابش (Back Reflection) در موج‌بر افزایش می‌یابد. پیشنهاد می‌شود برای این ستاپ از Duty Cycle نزدیک به ۰.۴۵ برای سرکوب مودهای ناخواسته استفاده کنید.
-              </p>
+          {/* Schematic */}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 lg:p-8 shadow-2xl flex flex-col items-center">
+            <h4 className="text-[10px] lg:text-xs font-bold text-slate-400 mb-6 uppercase self-start">Cross-Section (z-x)</h4>
+            <div className="w-full h-32 lg:h-40 relative flex items-end justify-center overflow-hidden">
+              <div className="absolute bottom-0 w-full h-10 bg-slate-700/30 border-t border-slate-600"></div>
+              <div className="flex items-end gap-[1px]">
+                {[...Array(8)].map((_, i) => (
+                  <React.Fragment key={i}>
+                    <div className="bg-cyan-600/80 w-3 lg:w-4" style={{ height: `${sinThickness/10}px` }}></div>
+                    <div className="bg-cyan-600/20 w-3 lg:w-4" style={{ height: `${(sinThickness - etchDepth)/10}px` }}></div>
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+            <p className="mt-4 text-[10px] text-slate-500 italic">شماتیک حکاکی نیترید سیلیسیم</p>
+          </div>
+
+          {/* Spectral Plot */}
+          <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 lg:p-8 shadow-2xl">
+            <h4 className="text-[10px] lg:text-xs font-bold text-slate-400 mb-4 uppercase">Spectral Response</h4>
+            <div className="h-48 lg:h-64 w-full relative">
+              <svg className="w-full h-full overflow-visible" viewBox="0 0 400 100">
+                <polyline fill="none" stroke="#06b6d4" strokeWidth="1.5" points={plotData.map((p, i) => `${(i / plotData.length) * 400},${100 - p.y}`).join(' ')} />
+                <circle cx="200" cy={100 - parseFloat(results.efficiency)} r="3" fill="#06b6d4" className="animate-pulse" />
+              </svg>
+              <div className="flex justify-between text-[8px] lg:text-[10px] text-slate-500 mt-2 px-1">
+                <span>{wavelength - 100} nm</span>
+                <span>{wavelength} nm</span>
+                <span>{wavelength + 100} nm</span>
+              </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-6 lg:mt-8 flex gap-3 p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl max-w-6xl mx-auto">
+          <ExclamationTriangleIcon className="w-5 h-5 lg:w-6 lg:h-6 text-amber-500 shrink-0" />
+          <p className="text-[10px] lg:text-xs text-slate-400 leading-relaxed">
+            <strong className="text-amber-500 mb-1 block">هشدار:</strong>
+            حساسیت به عمق حکاکی بالاست. پیشنهاد می‌شود از Duty Cycle نزدیک به ۰.۴۵ برای سرکوب مودها استفاده کنید.
+          </p>
         </div>
       </div>
     </div>
