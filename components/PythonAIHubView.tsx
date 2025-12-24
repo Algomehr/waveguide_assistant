@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { PYTHON_TOPICS } from '../constants';
 import { PythonTopic } from '../types';
 import { generatePythonTutorial } from '../services/geminiService';
@@ -9,13 +9,25 @@ import {
   CodeBracketIcon, 
   SparklesIcon, 
   CommandLineIcon,
-  ChevronDoubleLeftIcon
+  ChevronDoubleLeftIcon,
+  FunnelIcon
 } from '@heroicons/react/24/outline';
 
 const PythonAIHubView: React.FC = () => {
   const [selectedTopic, setSelectedTopic] = useState<PythonTopic | null>(null);
   const [tutorialContent, setTutorialContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+
+  const categories = useMemo(() => {
+    const cats = new Set(PYTHON_TOPICS.map(t => t.category));
+    return ['All', ...Array.from(cats)];
+  }, []);
+
+  const filteredTopics = useMemo(() => {
+    if (activeCategory === 'All') return PYTHON_TOPICS;
+    return PYTHON_TOPICS.filter(t => t.category === activeCategory);
+  }, [activeCategory]);
 
   const handleTopicClick = async (topic: PythonTopic) => {
     setSelectedTopic(topic);
@@ -79,7 +91,6 @@ const PythonAIHubView: React.FC = () => {
             </div>
           ) : (
             <div className="bg-slate-950 border border-slate-800 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-               {/* Notebook Aesthetic Background Elements */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[100px]"></div>
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 blur-[100px]"></div>
               
@@ -105,27 +116,44 @@ const PythonAIHubView: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-slate-900">
       <header className="p-10 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md">
-        <div className="flex items-center gap-4 mb-3">
+        <div className="flex items-center gap-4 mb-6">
           <div className="p-3 bg-cyan-500/10 rounded-2xl">
             <CodeBracketIcon className="w-8 h-8 text-cyan-500" />
           </div>
           <div>
             <h2 className="text-3xl font-bold text-white">مرکز پایتون و هوش مصنوعی</h2>
-            <p className="text-slate-400 mt-1">توسعه مهارت‌های محاسباتی و هوش مصنوعی در طراحی گرتینگ و موج‌بر.</p>
+            <p className="text-slate-400 mt-1">توسعه مهارت‌های محاسباتی، یادگیری ماشین و بهینه‌سازی در طراحی فوتونیک.</p>
           </div>
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <FunnelIcon className="w-5 h-5 text-slate-500 shrink-0" />
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 border ${
+                activeCategory === cat 
+                ? 'bg-cyan-500 text-white border-cyan-500 shadow-lg shadow-cyan-500/20' 
+                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-slate-200'
+              }`}
+            >
+              {cat === 'All' ? 'همه مباحث' : cat}
+            </button>
+          ))}
         </div>
       </header>
 
       <div className="flex-1 overflow-y-auto p-10">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {PYTHON_TOPICS.map((topic) => (
+            {filteredTopics.map((topic) => (
               <button
                 key={topic.id}
                 onClick={() => handleTopicClick(topic)}
                 className="group relative bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 p-7 rounded-[2rem] text-right transition-all duration-500 hover:shadow-2xl hover:shadow-cyan-500/10 hover:-translate-y-2 flex flex-col items-start overflow-hidden"
               >
-                {/* Decoration */}
                 <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-cyan-500/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
                 
                 <div className="w-full flex justify-between items-center mb-6">
@@ -151,6 +179,12 @@ const PythonAIHubView: React.FC = () => {
             ))}
           </div>
           
+          {filteredTopics.length === 0 && (
+            <div className="text-center py-20 bg-slate-800/20 rounded-[2.5rem] border border-dashed border-slate-700">
+              <p className="text-slate-500">مطلبی در این دسته‌بندی یافت نشد.</p>
+            </div>
+          )}
+
           <div className="mt-16 p-8 bg-slate-800/20 border border-slate-700/30 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8">
             <div className="flex-1">
               <h4 className="text-xl font-bold text-white mb-2">نیاز به یک اسکریپت سفارشی دارید؟</h4>
