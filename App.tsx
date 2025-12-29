@@ -11,6 +11,7 @@ import MaterialsView from './components/MaterialsView.tsx';
 import FabricationView from './components/FabricationView.tsx';
 import PythonAIHubView from './components/PythonAIHubView.tsx';
 import LabSetupView from './components/LabSetupView.tsx';
+import GuideView from './components/GuideView.tsx';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const App: React.FC = () => {
@@ -28,6 +29,7 @@ const App: React.FC = () => {
       case AppView.FABRICATION: return <FabricationView />;
       case AppView.PYTHON_AI: return <PythonAIHubView />;
       case AppView.LAB_SETUP: return <LabSetupView />;
+      case AppView.GUIDE: return <GuideView />;
       default: return <ChatView />;
     }
   };

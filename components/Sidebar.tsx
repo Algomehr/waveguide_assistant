@@ -10,7 +10,8 @@ import {
   CircleStackIcon,
   WrenchScrewdriverIcon,
   CodeBracketSquareIcon,
-  ScaleIcon
+  ScaleIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -29,6 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
     { id: AppView.FABRICATION, label: 'ساخت و کوپلینگ (SiN)', icon: WrenchScrewdriverIcon },
     { id: AppView.MATERIALS, label: 'بانک متریال', icon: CircleStackIcon },
     { id: AppView.SIMULATION, label: 'شبیه‌سازی و بهینه', icon: CpuChipIcon },
+    { id: AppView.GUIDE, label: 'راهنمای کامل سیستم', icon: InformationCircleIcon },
   ];
 
   return (

@@ -6,7 +6,6 @@ const BASE_SYSTEM_INSTRUCTION = `You are a world-class senior professor and rese
 When explaining physical or optical concepts, you are encouraged to generate high-quality, clean, and responsive SVG diagrams. 
 Always wrap SVG code in code blocks with the "svg" language tag.`;
 
-// Using gemini-3-flash-preview for the best balance of performance and free tier availability
 const DEFAULT_MODEL = "gemini-3-flash-preview";
 
 export const chatWithGemini = async (messages: Message[], systemInstruction: string) => {
@@ -22,6 +21,33 @@ export const chatWithGemini = async (messages: Message[], systemInstruction: str
     }
   });
   return response.text || '';
+};
+
+export const searchGlobalMarket = async (query: string) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const response = await ai.models.generateContent({
+    model: DEFAULT_MODEL,
+    contents: `Find real commercial photonic products and equipment from international suppliers (like Thorlabs, Newport, Edmund Optics, Hamamatsu, etc.) for: "${query}". 
+    Provide a list of 3-5 specific products with their manufacturer name, key specs, and why they fit this requirement. Respond in Persian.`,
+    config: {
+      tools: [{ googleSearch: {} }],
+      systemInstruction: "You are a technical procurement specialist for photonics labs. Search the web for real, currently available products and provide their direct source links."
+    },
+  });
+
+  const text = response.text || '';
+  const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+  
+  const links: GroundingLink[] = [];
+  if (groundingChunks) {
+    groundingChunks.forEach((chunk: any) => {
+      if (chunk.web?.uri && chunk.web?.title) {
+        links.push({ title: chunk.web.title, uri: chunk.web.uri });
+      }
+    });
+  }
+
+  return { text, links };
 };
 
 export const searchGrounding = async (query: string) => {

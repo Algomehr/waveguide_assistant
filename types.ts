@@ -8,7 +8,8 @@ export enum AppView {
   MATERIALS = 'MATERIALS',
   FABRICATION = 'FABRICATION',
   PYTHON_AI = 'PYTHON_AI',
-  LAB_SETUP = 'LAB_SETUP'
+  LAB_SETUP = 'LAB_SETUP',
+  GUIDE = 'GUIDE'
 }
 
 export interface Message {
