@@ -41,7 +41,17 @@ export interface Material {
   name: string;
   formula: string;
   index: number;
-  loss?: string;
+  category: 'Semiconductor' | 'Dielectric' | 'Polymer' | 'Photoresist';
   description: string;
-  category: 'Semiconductor' | 'Dielectric' | 'Polymer';
+  thermalExpansion?: string;
+  bandgap?: string;
+}
+
+export interface Equipment {
+  name: string;
+  type: 'Laser' | 'Optics' | 'Positioning' | 'Detection';
+  keySpecs: Record<string, string>;
+  description: string;
+  application: string;
+  buyingGuide: string;
 }

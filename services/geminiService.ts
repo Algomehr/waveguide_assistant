@@ -2,33 +2,40 @@
 import { GoogleGenAI } from "@google/genai";
 import { Message, GroundingLink } from "../types.ts";
 
+const BASE_SYSTEM_INSTRUCTION = `You are a world-class senior professor and researcher in Photonics, specializing in Waveguide Design and Grating Writing. 
+When explaining physical or optical concepts, you are encouraged to generate high-quality, clean, and responsive SVG diagrams. 
+Always wrap SVG code in code blocks with the "svg" language tag.`;
+
+// Using gemini-3-flash-preview for the best balance of performance and free tier availability
+const DEFAULT_MODEL = "gemini-3-flash-preview";
+
 export const chatWithGemini = async (messages: Message[], systemInstruction: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: DEFAULT_MODEL,
     contents: messages.map(m => ({
       role: m.role === 'model' ? 'model' : 'user',
       parts: [{ text: m.text }]
     })),
     config: {
-      systemInstruction
+      systemInstruction: BASE_SYSTEM_INSTRUCTION + "\n" + systemInstruction
     }
   });
-  return response.text;
+  return response.text || '';
 };
 
 export const searchGrounding = async (query: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: DEFAULT_MODEL,
     contents: `Recent research papers and articles about: ${query}. Please provide summaries in Persian for each English source.`,
     config: {
       tools: [{ googleSearch: {} }],
-      systemInstruction: "You are a scientific research assistant. Search for the latest academic papers. Provide a brief summary in Persian for each and include the direct link."
+      systemInstruction: BASE_SYSTEM_INSTRUCTION + "\nYou are a scientific research assistant. Search for the latest academic papers."
     },
   });
 
-  const text = response.text;
+  const text = response.text || '';
   const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
   
   const links: GroundingLink[] = [];
@@ -43,38 +50,44 @@ export const searchGrounding = async (query: string) => {
   return { text, links };
 };
 
+export const getProcurementAdvice = async (requirement: string) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const response = await ai.models.generateContent({
+    model: DEFAULT_MODEL,
+    contents: `Based on this requirement: "${requirement}", provide a detailed technical procurement guide for an optical lab. Recommend specific specs (power, wavelength, stability, materials). Respond in Persian.`,
+    config: {
+      systemInstruction: "You are an expert in optical laboratory instrumentation and procurement for high-end photonics research."
+    }
+  });
+  return response.text || '';
+};
+
 export const generateLesson = async (topicTitle: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: `Write a detailed academic lesson note in Persian about "${topicTitle}".`,
-    config: {
-      systemInstruction: "You are a senior professor in Photonics specializing in waveguide design."
-    }
+    model: DEFAULT_MODEL,
+    contents: `Write a detailed academic lesson note in Persian about "${topicTitle}". Include SVG diagrams where helpful.`,
+    config: { systemInstruction: BASE_SYSTEM_INSTRUCTION }
   });
-  return response.text;
+  return response.text || '';
 };
 
 export const generatePythonTutorial = async (topicTitle: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: DEFAULT_MODEL,
     contents: `Create a comprehensive Python & AI tutorial for: "${topicTitle}".`,
-    config: {
-      systemInstruction: "You are an expert Computational Physicist and Senior Python Developer."
-    }
+    config: { systemInstruction: BASE_SYSTEM_INSTRUCTION }
   });
-  return response.text;
+  return response.text || '';
 };
 
 export const getSimulationHelp = async (task: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: DEFAULT_MODEL,
     contents: task,
-    config: {
-      systemInstruction: "You are an expert computational physicist specialized in photonic simulations."
-    }
+    config: { systemInstruction: BASE_SYSTEM_INSTRUCTION + "\nYou are an expert computational physicist." }
   });
-  return response.text;
+  return response.text || '';
 };
