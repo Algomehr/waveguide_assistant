@@ -11,9 +11,9 @@ import {
   ShoppingCartIcon,
   SparklesIcon,
   ChevronRightIcon,
-  TagIcon,
   GlobeAltIcon,
-  LinkIcon
+  LinkIcon,
+  ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
 
 const MATERIALS_DATA: Material[] = [
@@ -84,7 +84,7 @@ const MaterialsView: React.FC = () => {
       const res = await searchGlobalMarket(requirement);
       setMarketResult(res);
     } catch (err) {
-      setMarketResult({ text: 'خطا در جستجوی بازار جهانی.', links: [] });
+      setMarketResult({ text: 'خطا در جستجوی بازار.', links: [] });
     } finally {
       setIsLoading(false);
     }
@@ -99,10 +99,16 @@ const MaterialsView: React.FC = () => {
               <CircleStackIcon className="w-8 h-8 text-cyan-500" />
             </div>
             <div>
-              <h2 className="text-2xl lg:text-3xl font-black text-white">مرکز متریال و بازار جهانی</h2>
-              <p className="text-sm text-slate-400 mt-1">بانک اطلاعاتی دقیق و جستجوی زنده محصولات شرکت‌های بین‌المللی.</p>
+              <h2 className="text-2xl lg:text-3xl font-black text-white">بانک متریال و جستجوی بازار</h2>
+              <p className="text-sm text-slate-400 mt-1">اطلاعات فنی مواد و جستجوی زنده محصولات در بازارهای داخلی و خارجی.</p>
             </div>
           </div>
+          {activeTab === 'global' && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full">
+              <ExclamationCircleIcon className="w-4 h-4 text-amber-500" />
+              <span className="text-[10px] font-black text-amber-500 uppercase">Premium Search Tool Active</span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap p-1 bg-slate-900 rounded-2xl w-fit border border-slate-800 gap-1">
@@ -110,7 +116,7 @@ const MaterialsView: React.FC = () => {
             { id: 'materials', label: 'بانک متریال', icon: BeakerIcon },
             { id: 'equipment', label: 'تجهیزات مرجع', icon: LightBulbIcon },
             { id: 'procurement', label: 'مشاور فنی', icon: ShoppingCartIcon },
-            { id: 'global', label: 'جستجوی بازار جهانی', icon: GlobeAltIcon }
+            { id: 'global', label: 'جستجوی بازار (زنده)', icon: GlobeAltIcon }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -219,8 +225,8 @@ const MaterialsView: React.FC = () => {
                    <GlobeAltIcon className="w-8 h-8 text-cyan-500" />
                  </div>
                  <div>
-                   <h3 className="text-xl font-black text-white">جستجوی بازار جهانی (Live Search)</h3>
-                   <p className="text-sm text-slate-400">جستجوی قطعات در سایت‌های Thorlabs, Newport, Hamamatsu و غیره.</p>
+                   <h3 className="text-xl font-black text-white">جستجوی هوشمند بازار (داخلی و خارجی)</h3>
+                   <p className="text-sm text-slate-400">جستجوی ابزار، تجهیزات اپتیکی، مواد شیمیایی و قطعات در تامین‌کنندگان جهانی و ایرانی.</p>
                  </div>
                </div>
                <div className="relative">
@@ -229,7 +235,7 @@ const MaterialsView: React.FC = () => {
                     value={requirement}
                     onChange={(e) => setRequirement(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleGlobalSearch()}
-                    placeholder="نام قطعه یا نیاز فنی (مثلاً: 1550nm Polarization Controller)"
+                    placeholder="نام کالا یا نیاز فنی (مثلاً: منشور PBS یا پودر سیلیکون نیترید)"
                     className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-5 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-right"
                   />
                   <button 
@@ -237,9 +243,12 @@ const MaterialsView: React.FC = () => {
                     disabled={isLoading} 
                     className="absolute left-3 top-1/2 -translate-y-1/2 bg-cyan-600 hover:bg-cyan-500 text-white px-8 py-2.5 rounded-xl font-black transition-all disabled:opacity-50"
                   >
-                    {isLoading ? 'در حال جستجو...' : 'جستجو در بازار'}
+                    {isLoading ? 'در حال جستجو...' : 'جستجوی زنده در بازار'}
                   </button>
                </div>
+               <p className="mt-4 text-[10px] text-slate-500 text-right pr-2">
+                 * این جستجو شامل شرکت‌های دانش‌بنیان ایرانی و توزیع‌کنندگان معتبر جهانی است.
+               </p>
             </div>
 
             {marketResult && (
@@ -265,7 +274,7 @@ const MaterialsView: React.FC = () => {
                           <LinkIcon className="w-5 h-5 text-cyan-500" />
                           <span className="text-xs font-bold text-slate-300 group-hover:text-white truncate max-w-[200px]">{link.title}</span>
                         </div>
-                        <span className="text-[10px] text-slate-500 uppercase font-black">View Source</span>
+                        <span className="text-[10px] text-slate-500 uppercase font-black">Link</span>
                       </a>
                     ))}
                   </div>

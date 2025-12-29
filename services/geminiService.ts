@@ -6,13 +6,15 @@ const BASE_SYSTEM_INSTRUCTION = `You are a world-class senior professor and rese
 When explaining physical or optical concepts, you are encouraged to generate high-quality, clean, and responsive SVG diagrams. 
 Always wrap SVG code in code blocks with the "svg" language tag.`;
 
-// Using gemini-3-pro-preview for complex scientific/STEM tasks
-const DEFAULT_MODEL = "gemini-3-pro-preview";
+// Using gemini-3-pro-preview for complex scientific tasks
+const PRO_MODEL = "gemini-3-pro-preview";
+// Using gemini-3-flash-preview for search/basic tasks to be cost-effective
+const FLASH_MODEL = "gemini-3-flash-preview";
 
 export const chatWithGemini = async (messages: Message[], systemInstruction: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: DEFAULT_MODEL,
+    model: PRO_MODEL,
     contents: messages.map(m => ({
       role: m.role === 'model' ? 'model' : 'user',
       parts: [{ text: m.text }]
@@ -27,7 +29,7 @@ export const chatWithGemini = async (messages: Message[], systemInstruction: str
 export const generateSyllabus = async (topicTitle: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: DEFAULT_MODEL,
+    model: FLASH_MODEL,
     contents: `Create a professional 5-7 step syllabus for deep learning about: "${topicTitle}". Each step should be a specific sub-topic.`,
     config: {
       responseMimeType: "application/json",
@@ -57,12 +59,13 @@ export const generateSyllabus = async (topicTitle: string) => {
 export const searchGlobalMarket = async (query: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: `Find real commercial photonic products and equipment from international suppliers (like Thorlabs, Newport, Edmund Optics, Hamamatsu, etc.) for: "${query}". 
-    Provide a list of 3-5 specific products with their manufacturer name, key specs, and why they fit this requirement. Respond in Persian.`,
+    model: FLASH_MODEL,
+    contents: `Find products, materials, or equipment related to: "${query}". 
+    Search both International suppliers (Thorlabs, Newport, Sigma-Aldrich, etc.) and Iranian suppliers (Knowledge-based companies, distributors in Laleh-Zar, specialized import/export firms, and local manufacturers). 
+    List 3-5 specific options with manufacturer/supplier name, brief technical specs, and why they are suitable. Provide direct website links if found. Respond in Persian.`,
     config: {
       tools: [{ googleSearch: {} }],
-      systemInstruction: "You are a technical procurement specialist for photonics labs. Search the web for real, currently available products and provide their direct source links."
+      systemInstruction: "You are a comprehensive procurement specialist for advanced labs. You have knowledge of global brands and the Iranian domestic market. Search for tools, optics, chemicals, and raw materials equally."
     },
   });
 
@@ -84,7 +87,7 @@ export const searchGlobalMarket = async (query: string) => {
 export const searchGrounding = async (query: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: FLASH_MODEL,
     contents: `Recent research papers and articles about: ${query}. Please provide summaries in Persian for each English source.`,
     config: {
       tools: [{ googleSearch: {} }],
@@ -110,7 +113,7 @@ export const searchGrounding = async (query: string) => {
 export const generateLesson = async (mainTopic: string, subTopic: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: DEFAULT_MODEL,
+    model: PRO_MODEL,
     contents: `Write an extremely detailed academic lesson note in Persian about the sub-topic "${subTopic}" within the context of "${mainTopic}". 
     Use advanced physical formulas (LaTeX), deep technical analysis, and SVG diagrams. This is for a senior PhD level researcher.`,
     config: { systemInstruction: BASE_SYSTEM_INSTRUCTION }
@@ -121,7 +124,7 @@ export const generateLesson = async (mainTopic: string, subTopic: string) => {
 export const generatePythonTutorial = async (mainTopic: string, subTopic: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: DEFAULT_MODEL,
+    model: PRO_MODEL,
     contents: `Create a comprehensive, production-ready Python & AI tutorial for: "${subTopic}" (Part of ${mainTopic}). 
     Include complex code examples, library integrations (NumPy/SciPy/Jax), and detailed comments.`,
     config: { systemInstruction: BASE_SYSTEM_INSTRUCTION }
@@ -132,18 +135,17 @@ export const generatePythonTutorial = async (mainTopic: string, subTopic: string
 export const getSimulationHelp = async (task: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: DEFAULT_MODEL,
+    model: PRO_MODEL,
     contents: task,
     config: { systemInstruction: BASE_SYSTEM_INSTRUCTION + "\nYou are an expert computational physicist." }
   });
   return response.text || '';
 };
 
-// Fix: Implement missing getProcurementAdvice function exported for MaterialsView
 export const getProcurementAdvice = async (requirement: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: DEFAULT_MODEL,
+    model: PRO_MODEL,
     contents: `Based on the following requirement, provide detailed procurement advice, including recommended technical specifications, key features to look for, and quality considerations. Respond in Persian: "${requirement}"`,
     config: {
       systemInstruction: "You are a senior technical procurement advisor specializing in high-end photonics equipment and optical materials."
